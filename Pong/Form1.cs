@@ -38,6 +38,7 @@ namespace Pong
 
         // check to see if a new game can be started
         Boolean newGameOk = true;
+        Boolean paused = false;
 
         //ball directions, speed, and rectangle
         Boolean ballMoveRight = true;
@@ -91,6 +92,9 @@ namespace Pong
                     {
                         Close();
                     }
+                    break;
+                case Keys.Escape:
+                    Paused();
                     break;
             }
         }
@@ -158,7 +162,9 @@ namespace Pong
         /// This method is the game engine loop that updates the position of all elements
         /// and checks for collisions.
         /// </summary>
-        private void gameUpdateLoop_Tick(object sender, EventArgs e)
+        /// 
+     
+    private void gameUpdateLoop_Tick(object sender, EventArgs e)
         {
             #region update ball position
 
@@ -239,11 +245,11 @@ namespace Pong
             if (ball.IntersectsWith(p2)|| ball.IntersectsWith(p1))
             {
                 collisionSound.Play();
-                ballMoveRight = !ballMoveRight;
+                ballMoveRight = !ballMoveRight;// change diredtion 
                 faster++;
                 if(faster > 4)
                 {
-                    PADDLE_SPEED= PADDLE_SPEED*2;
+                    PADDLE_SPEED= PADDLE_SPEED*2;  // every 4 hits speed doubles 
                     BALL_SPEED=BALL_SPEED*2;
                     faster = 0;
                 }
@@ -272,15 +278,13 @@ namespace Pong
                 // GameOver method. Else change direction of ball and call SetParameters method.
                 if (player2Score == gameWinScore)
                 {
-                    
-                    GameOver("Player 2 \n Has Defeated Player 1");
-
+                    GameOver("Player 2 \n Has Defeated Player 1"); // end winner msg
                 }
 
                 else
                 {
                     ballMoveRight = !ballMoveRight;
-                    SetParameters();
+                    SetParameters();  // reset screen and change direction 
                 }
                 
             }
@@ -293,12 +297,12 @@ namespace Pong
                 if (player1Score == gameWinScore)
                 {
                   
-                    GameOver("Player 1 \n Has Defeated Player 2");
+                    GameOver("Player 1 \n Has Defeated Player 2"); // p1 winns 
                 }
                 else
                 {
                     SetParameters();
-                    ballMoveRight = !ballMoveRight;
+                    ballMoveRight = !ballMoveRight;// reset screen and change direction 
                 }
             }
            
@@ -315,18 +319,45 @@ namespace Pong
         /// <param name="winner">The player name to be shown as the winner</param>
         private void GameOver(string winner)
         {
-            newGameOk = true;
+           
             startLabel.Visible = true;
-            startLabel.Text = winner;
+            startLabel.Text = winner; // show winner msg 
             //  create game over logic
             gameUpdateLoop.Stop();
             this.Refresh();
-            Thread.Sleep(2000);
-            startLabel.Text = "Play Again?";
+            if (player1Score==3||player2Score==3)
+            {
+                newGameOk = true;
+                Thread.Sleep(2000);
+                startLabel.Text = "Play Again?";
+            }
+            else if (player1Score >10 || player2Score > 10)
+            {
+                newGameOk = true;
+                Thread.Sleep(2000);
+                startLabel.Text = "Play Again?";
+            }
+
             // --- stop the gameUpdateLoop
             // --- show a message on the startLabel to indicate a winner, (need to Refresh).
             // --- pause for two seconds 
             // --- use the startLabel to ask the user if they want to play again
+
+        }
+        private void Paused() // pauses the game 
+        {
+            if (paused)
+            {
+                startLabel.Visible = true;
+                startLabel.Text = "Paused";
+                gameUpdateLoop.Stop();
+            }
+            else
+            {
+                startLabel.Visible = false;
+                gameUpdateLoop.Start();
+            }
+            paused = !paused;
 
         }
 
@@ -339,7 +370,7 @@ namespace Pong
             e.Graphics.FillRectangle(drawBrush, ball);
             //  draw scores to the screen using DrawString
             e.Graphics.DrawString(player1Score +"", drawFont,drawBrush, this.Width/5,10 );
-            e.Graphics.DrawString(player2Score + "", drawFont, drawBrush, this.Width - this.Width / 5, 10);
+            e.Graphics.DrawString(player2Score + "", drawFont, drawBrush, this.Width - this.Width / 5-5, 10);
         }
 
     }
